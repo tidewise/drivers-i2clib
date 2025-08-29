@@ -88,6 +88,14 @@ void PCA9685::pwmConfigurationToRegisters(uint8_t* registers,
             return;
         }
         default: {
+            if (configuration.on_edge >= 4096) {
+                throw invalid_argument(
+                    "invalid value for on_edge: " + to_string(configuration.on_edge));
+            }
+            if (configuration.off_edge >= 4096) {
+                throw invalid_argument(
+                    "invalid value for off_edge: " + to_string(configuration.off_edge));
+            }
             registers[0] = configuration.on_edge & 0xFF;
             registers[1] = configuration.on_edge >> 8;
             registers[2] = configuration.off_edge & 0xFF;

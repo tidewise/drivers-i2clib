@@ -1,6 +1,8 @@
 #ifndef I2CLIB_I2CBUS_HPP
 #define I2CLIB_I2CBUS_HPP
 
+#include <base/Time.hpp>
+
 #include <array>
 #include <string>
 
@@ -14,9 +16,17 @@ namespace i2clib {
     class I2CBus {
         int m_fd = -1;
 
+        base::Time m_timeout = base::Time::fromMilliseconds(100);
+
     public:
         I2CBus(std::string const& path);
         ~I2CBus();
+
+        /** Configure the i2c timeout
+         *
+         * The default is 100ms, it is enforced on construction
+         */
+        void setTimeout(base::Time const& timeout);
 
         /** Write \c size bytes at the given address
          */

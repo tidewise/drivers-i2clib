@@ -22,11 +22,24 @@ I2CBus::I2CBus(std::string const& path) {
         throw IOError(string("failed to open bus: ") + strerror(errno));
     }
     m_fd = fd;
+
+    setTimeout(m_timeout);
 }
 
 I2CBus::~I2CBus() {
     close(m_fd);
 }
+
+void I2CBus::setTimeout(base::Time const& timeout) {
+    int ret = ioctl(
+        m_fd, I2C_TIMEOUT,
+        static_cast<unsigned long>(timeout.toMilliseconds() / 10)
+    );
+    if (ret == -1) {
+        throw IOError("could not configure i2c bus timeout");
+    }
+}
+
 
 void I2CBus::write(uint8_t address, uint8_t* registers, size_t size)
 {

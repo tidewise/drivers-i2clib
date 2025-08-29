@@ -1,9 +1,10 @@
 #ifndef I2CLIB_PCA9685_HPP
 #define I2CLIB_PCA9685_HPP
 
+#include <i2clib/I2CBus.hpp>
+
 #include <cstdint>
-#include <stdexcept>
-#include <string>
+#include <functional>
 #include <vector>
 
 namespace i2clib {
@@ -12,6 +13,9 @@ namespace i2clib {
      * This drivers is an opinionated implementation of the chip's functions. It relies
      * on the auto-increment function to be enabled, and does not implement the restart
      * function (i.e. one has to stop all PWMs before stopping the chip)
+     *
+     * The constructor will stop all PWMs, put the chip in sleep mode and set the
+     * chip configuration to the manufacturer's default plus the auto-increment enabled.
      */
     class PCA9685 {
     public:
@@ -55,7 +59,8 @@ namespace i2clib {
         static constexpr uint8_t REGISTER_ALL_LED_OFF_H = 0xFD;
         static constexpr uint8_t REGISTER_PRESCALE = 0xFE;
 
-        int m_fd = -1;
+        I2CBus& m_i2c;
+
         std::uint8_t m_address = 0;
         uint8_t m_mode1 =
             MODE1_SLEEP | MODE1_ALLCALL_ENABLED | MODE1_AUTO_INCREMENT_ENABLED;
@@ -73,20 +78,14 @@ namespace i2clib {
             size_t size);
 
     public:
-        struct IOError : public std::runtime_error {
-            using std::runtime_error::runtime_error;
-        };
-        struct WriteError : public IOError {
-            using IOError::IOError;
-        };
         static constexpr int OSCILLATOR_PERIOD_NS = 40;
 
         static std::uint8_t periodToPrescale(std::uint32_t ns);
 
-        PCA9685(std::string const& i2c_bus, uint8_t address);
+        PCA9685(I2CBus& i2c_bus, uint8_t address);
         ~PCA9685();
 
-        /** Stop all PWMs (i.e. make them be always off) */
+        /** Stop all PWMs (i.e. make them be all off) */
         void stop();
 
         /** Put the chip to sleep

@@ -1,7 +1,3 @@
 rock_library(i2clib
-    SOURCES Dummy.cpp
-    HEADERS Dummy.hpp)
-
-rock_executable(i2clib_bin Main.cpp
-    DEPS i2clib)
-
+    SOURCES PCA9685.cpp
+    HEADERS PCA9685.hpp)

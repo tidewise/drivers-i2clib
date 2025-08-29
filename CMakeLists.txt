@@ -6,7 +6,7 @@ project(i2clib
         DESCRIPTION "General i2c helpers and library of supported chips")
 find_package(Rock)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 rock_init()

@@ -132,6 +132,7 @@ void PCA9685::writeDutyCycles(int pwm, vector<float> const& ratios)
             c.mode = PWM_MODE_ON;
         }
         else {
+            c.mode = PWM_MODE_NORMAL;
             c.on_edge = 0;
             c.off_edge = duty_cycle - 1;
         }

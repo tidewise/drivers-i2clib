@@ -3,7 +3,8 @@
 
 using namespace i2clib;
 
-struct PCA9685Test : public ::testing::Test {};
+struct PCA9685Test : public ::testing::Test {
+};
 
 TEST_F(PCA9685Test, it_computes_prescaling_for_200Hz_as_described_in_the_documentation)
 {

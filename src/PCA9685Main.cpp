@@ -9,17 +9,17 @@ using namespace i2clib;
 static constexpr int ARGC_MIN = 4;
 static constexpr int ARG_INDEX_CMD = 3;
 
-void usage(string const& cmd, ostream& io) {
-    io
-        << "usage: " << cmd << " DEV ADDRESS CMD [ARGS]\n"
-        << "  set-period TIME_NS PWM period in nanoseconds (must sleep first)"
-        << "  sleep put the chip to sleep"
-        << "  wakeup wake the chip up after a sleep"
-        << "  set-duty DUTY_CYCLE where DUTY_CYCLE is a float between 0 and 1"
-        << endl;
+void usage(string const& cmd, ostream& io)
+{
+    io << "usage: " << cmd << " DEV ADDRESS CMD [ARGS]\n"
+       << "  set-period TIME_NS PWM period in nanoseconds (must sleep first)"
+       << "  sleep put the chip to sleep"
+       << "  wakeup wake the chip up after a sleep"
+       << "  set-duty DUTY_CYCLE where DUTY_CYCLE is a float between 0 and 1" << endl;
 }
 
-void validateCmdArgc(string cmd, int argc, int expectedCmdArgs) {
+void validateCmdArgc(string cmd, int argc, int expectedCmdArgs)
+{
     if (argc < expectedCmdArgs + ARGC_MIN) {
         cerr << "not enough arguments to " << cmd << endl;
         exit(1);
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 
         i2clib::PCA9685 chip(bus, address);
         chip.writeNormalMode();
-        chip.writeDutyCycles(pwm, { ratio });
+        chip.writeDutyCycles(pwm, {ratio});
     }
     return 0;
 }

@@ -1,5 +1,5 @@
-#include <i2clib/I2CBus.hpp>
 #include <i2clib/Exceptions.hpp>
+#include <i2clib/I2CBus.hpp>
 
 #include <cstdlib>
 #include <cstring>
@@ -7,16 +7,17 @@
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
+#include <sstream>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sstream>
 
 using namespace i2clib;
 using namespace std;
 
-I2CBus::I2CBus(std::string const& path) {
+I2CBus::I2CBus(std::string const& path)
+{
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
         throw IOError(string("failed to open bus: ") + strerror(errno));
@@ -26,20 +27,20 @@ I2CBus::I2CBus(std::string const& path) {
     setTimeout(m_timeout);
 }
 
-I2CBus::~I2CBus() {
+I2CBus::~I2CBus()
+{
     close(m_fd);
 }
 
-void I2CBus::setTimeout(base::Time const& timeout) {
-    int ret = ioctl(
-        m_fd, I2C_TIMEOUT,
-        static_cast<unsigned long>(timeout.toMilliseconds() / 10)
-    );
+void I2CBus::setTimeout(base::Time const& timeout)
+{
+    int ret = ioctl(m_fd,
+        I2C_TIMEOUT,
+        static_cast<unsigned long>(timeout.toMilliseconds() / 10));
     if (ret == -1) {
         throw IOError("could not configure i2c bus timeout");
     }
 }
-
 
 void I2CBus::write(uint8_t address, uint8_t* registers, size_t size)
 {

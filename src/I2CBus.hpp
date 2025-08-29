@@ -36,8 +36,7 @@ namespace i2clib {
          *
          * @example i2c.write(DEVICE_ADRESS, { 1, 2 })
          */
-        template <int Size>
-        void write(uint8_t address, uint8_t const (&data)[Size])
+        template <int Size> void write(uint8_t address, uint8_t const (&data)[Size])
         {
             std::array<uint8_t, Size> rw_data;
             std::copy(data, data + Size, rw_data.begin());

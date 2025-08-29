@@ -68,6 +68,7 @@ int main(int argc, char** argv)
         auto ratio = stof(argv[ARG_INDEX_CMD + 2]);
 
         i2clib::PCA9685 chip(bus, address);
+        chip.writeNormalMode();
         chip.writeDutyCycles(pwm, { ratio });
     }
     return 0;

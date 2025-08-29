@@ -82,7 +82,14 @@ namespace i2clib {
 
         static std::uint8_t periodToPrescale(std::uint32_t ns);
 
+        /** Create the driver and initialize the chip to defaults
+         *
+         * See the class documentation for the initialization
+         */
         PCA9685(I2CBus& i2c_bus, uint8_t address);
+
+        /** Destroy the driver, stopping PWMs and putting the chip to sleep
+         */
         ~PCA9685();
 
         /** Stop all PWMs (i.e. make them be all off) */

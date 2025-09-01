@@ -47,19 +47,17 @@ int main(int argc, char** argv)
 
     I2CBus bus(i2c_dev);
 
+    i2clib::PCA9685 chip(bus, address);
     if (cmd == "sleep") {
-        i2clib::PCA9685 chip(bus, address);
         chip.writeSleepMode();
     }
     else if (cmd == "wakeup") {
-        i2clib::PCA9685 chip(bus, address);
         chip.writeNormalMode();
     }
     else if (cmd == "set-period") {
         validateCmdArgc("set-period", argc, 1);
         auto duration = stoi(argv[ARG_INDEX_CMD + 1]);
 
-        i2clib::PCA9685 chip(bus, address);
         chip.writeCycleDuration(duration);
     }
     else if (cmd == "set-duty") {
@@ -67,7 +65,6 @@ int main(int argc, char** argv)
         auto pwm = stoi(argv[ARG_INDEX_CMD + 1]);
         auto ratio = stof(argv[ARG_INDEX_CMD + 2]);
 
-        i2clib::PCA9685 chip(bus, address);
         chip.writeNormalMode();
         chip.writeDutyCycles(pwm, {ratio});
     }

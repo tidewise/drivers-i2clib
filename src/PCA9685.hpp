@@ -40,9 +40,11 @@ namespace i2clib {
         };
 
     private:
-        static constexpr uint8_t MODE1_AUTO_INCREMENT_ENABLED = 1 << 5;
-        static constexpr uint8_t MODE1_SLEEP = 1 << 4;
         static constexpr uint8_t MODE1_ALLCALL_ENABLED = 1 << 0;
+        static constexpr uint8_t MODE1_SLEEP = 1 << 4;
+        static constexpr uint8_t MODE1_AUTO_INCREMENT_ENABLED = 1 << 5;
+        static constexpr uint8_t MODE1_EXTERNAL_CLOCK = 1 << 6;
+        static constexpr uint8_t MODE1_RESTART = 1 << 7;
         static constexpr uint8_t MODE2_OUTDRV_TOTEM = 1 << 2;
         static constexpr uint8_t PWM_FULL_ON = 1 << 4;
         static constexpr uint8_t PWM_FULL_OFF = 1 << 4;
@@ -67,6 +69,7 @@ namespace i2clib {
         uint8_t m_mode2 = MODE2_OUTDRV_TOTEM;
 
         void writeMode1();
+        void writeMode1(uint8_t value);
         void writeMode2();
 
         void pwmConfigurationToRegisters(uint8_t* registers,
@@ -100,6 +103,24 @@ namespace i2clib {
          * This is required to set the PWM period
          */
         void writeSleepMode();
+
+        /** Write the restart bit of mode 1
+         *
+         * As a safety measure, if the PWM output is nonzero when the chip is put
+         * to sleep, the PWM generation is not resumed directly when it is woken up.
+         *
+         * In that case, one has a few options, but the main two are:
+         * - explicitly configure the PWM outputs again
+         * - write the restart bit, after a 500us delay since the wakeup
+         */
+        void writeRestart();
+
+        /** Enable the external clock
+         *
+         * Use an external clock connected to the appropriate pin instead of
+         * the internal oscillator. Must be called while in sleep mode
+         */
+        void enableExternalClock();
 
         /** Put the chip to active
          */

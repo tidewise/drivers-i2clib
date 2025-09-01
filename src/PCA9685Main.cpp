@@ -1,5 +1,7 @@
+#include <chrono>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include <i2clib/PCA9685.hpp>
 
@@ -12,10 +14,15 @@ static constexpr int ARG_INDEX_CMD = 3;
 void usage(string const& cmd, ostream& io)
 {
     io << "usage: " << cmd << " DEV ADDRESS CMD [ARGS]\n"
-       << "  set-period TIME_NS PWM period in nanoseconds (must sleep first)"
-       << "  sleep put the chip to sleep"
-       << "  wakeup wake the chip up after a sleep"
-       << "  set-duty DUTY_CYCLE where DUTY_CYCLE is a float between 0 and 1" << endl;
+       << "  set-duty DUTY_CYCLE where DUTY_CYCLE is a float between 0 and 1\n"
+       << "  set-period TIME_NS PWM period in nanoseconds\n"
+       << "     The command stops PWM generation and put the chip to sleep\n"
+       << "  restart perform the PWM generation restart after a sleep\n"
+       << "  sleep put the chip to sleep\n"
+       << "  enable-external-clock use an external clock instead of the internal one\n"
+       << "     The command stops PWM generation and put the chip to sleep\n"
+       << "  wakeup wake the chip up after a sleep\n"
+       << flush;
 }
 
 void validateCmdArgc(string cmd, int argc, int expectedCmdArgs)
@@ -51,6 +58,16 @@ int main(int argc, char** argv)
     if (cmd == "sleep") {
         chip.writeSleepMode();
     }
+    else if (cmd == "enable-external-clock") {
+        chip.stop();
+        chip.writeSleepMode();
+        chip.enableExternalClock();
+    }
+    else if (cmd == "restart") {
+        chip.writeNormalMode();
+        this_thread::sleep_for(chrono::milliseconds(600));
+        chip.writeRestart();
+    }
     else if (cmd == "wakeup") {
         chip.writeNormalMode();
     }
@@ -58,6 +75,8 @@ int main(int argc, char** argv)
         validateCmdArgc("set-period", argc, 1);
         auto duration = stoi(argv[ARG_INDEX_CMD + 1]);
 
+        chip.stop();
+        chip.writeSleepMode();
         chip.writeCycleDuration(duration);
     }
     else if (cmd == "set-duty") {

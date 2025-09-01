@@ -43,6 +43,17 @@ void PCA9685::writeSleepMode()
     writeMode1();
 }
 
+void PCA9685::enableExternalClock()
+{
+    m_mode1 |= MODE1_EXTERNAL_CLOCK;
+    writeMode1();
+}
+
+void PCA9685::writeRestart()
+{
+    writeMode1(m_mode1 | MODE1_RESTART);
+}
+
 void PCA9685::writeNormalMode()
 {
     m_mode1 &= ~MODE1_SLEEP;
@@ -54,9 +65,14 @@ void PCA9685::stop()
     m_i2c.write(m_address, {REGISTER_ALL_LED_OFF_H, PWM_FULL_OFF});
 }
 
+void PCA9685::writeMode1(uint8_t value)
+{
+    m_i2c.write(m_address, {REGISTER_MODE1, value});
+}
+
 void PCA9685::writeMode1()
 {
-    m_i2c.write(m_address, {REGISTER_MODE1, m_mode1});
+    writeMode1(m_mode1);
 }
 
 void PCA9685::writeMode2()

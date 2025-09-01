@@ -14,7 +14,6 @@ static constexpr int ARG_INDEX_CMD = 3;
 void usage(string const& cmd, ostream& io)
 {
     io << "usage: " << cmd << " DEV ADDRESS CMD [ARGS]\n"
-       << "  set-duty DUTY_CYCLE where DUTY_CYCLE is a float between 0 and 1\n"
        << "  set-period TIME_NS PWM period in nanoseconds\n"
        << "     The command stops PWM generation and put the chip to sleep\n"
        << "  restart perform the PWM generation restart after a sleep\n"
@@ -23,6 +22,9 @@ void usage(string const& cmd, ostream& io)
        << "     The command stops PWM generation and put the chip to sleep\n"
        << "  stop set all PWM outputs to zero\n"
        << "  wakeup wake the chip up after a sleep\n"
+       << "  set-duty-us PWM TIME_US where TIME_US is the ON time in microseconds\n"
+       << "  set-duty-ratio PWM RATIO where RATIO is the ratio of the ON phase of \n"
+       << "       the PWM period, as a float between 0 and 1\n"
        << flush;
 }
 
@@ -83,13 +85,21 @@ int main(int argc, char** argv)
         chip.writeSleepMode();
         chip.writeCycleDuration(duration);
     }
-    else if (cmd == "set-duty") {
+    else if (cmd == "set-duty-us") {
+        validateCmdArgc("set-duty-us", argc, 2);
+        auto pwm = stoi(argv[ARG_INDEX_CMD + 1]);
+        uint32_t period = stoi(argv[ARG_INDEX_CMD + 2]);
+
+        chip.writeNormalMode();
+        chip.writeDutyTimes(pwm, {period * 1000});
+    }
+    else if (cmd == "set-duty-ratio") {
         validateCmdArgc("set-duty", argc, 2);
         auto pwm = stoi(argv[ARG_INDEX_CMD + 1]);
         auto ratio = stof(argv[ARG_INDEX_CMD + 2]);
 
         chip.writeNormalMode();
-        chip.writeDutyCycles(pwm, {ratio});
+        chip.writeDutyRatios(pwm, {ratio});
     }
     else {
         cerr << "invalid command " << cmd << endl;

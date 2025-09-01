@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace i2clib;
+using PWMConfiguration = PCA9685PWMConfiguration;
 
 uint8_t PCA9685::periodToPrescale(uint32_t ns)
 {
@@ -25,6 +26,12 @@ uint8_t PCA9685::periodToPrescale(uint32_t ns)
     }
 
     return std::round(ns / denom) - 1;
+}
+
+uint32_t PCA9685::prescaleToPeriod(uint8_t prescale)
+{
+    float denom = OSCILLATOR_PERIOD_NS * 4096;
+    return (prescale + 1) * denom;
 }
 
 PCA9685::PCA9685(I2CBus& i2c, uint8_t address)
@@ -86,11 +93,11 @@ void PCA9685::pwmConfigurationToRegisters(uint8_t* registers,
     PWMConfiguration const& configuration)
 {
     switch (configuration.mode) {
-        case PWM_MODE_ON:
+        case PWMConfiguration::MODE_ON:
             registers[1] = PWM_FULL_ON;
             registers[3] = 0;
             return;
-        case PWM_MODE_OFF: {
+        case PWMConfiguration::MODE_OFF: {
             registers[1] = 0;
             registers[3] = PWM_FULL_OFF;
             return;
@@ -135,23 +142,33 @@ void PCA9685::writePWMConfigurations(int pwm,
     return writePWMConfigurations(pwm, configurations.data(), configurations.size());
 }
 
-void PCA9685::writeDutyCycles(int pwm, vector<float> const& ratios)
+uint32_t PCA9685::readPWMPeriod() {
+    uint8_t prescale = m_i2c.read<1>(m_address, REGISTER_PRESCALE).at(0);
+    return prescaleToPeriod(prescale);
+}
+
+void PCA9685::writeDutyTimes(int pwm, vector<uint32_t> const& times)
+{
+    // Get the duration of a single PWM step (one of 4096)
+    uint32_t quanta = readPWMPeriod() / 4096;
+
+    PWMConfiguration configurations[PWM_COUNT];
+    for (size_t i = 0; i < times.size(); ++i) {
+        auto& c{configurations[i]};
+        int32_t off_edge = times[i] / quanta - 1;
+        c = PWMConfiguration::fromUnnormalizedOffEdge(off_edge);
+    }
+
+    writePWMConfigurations(pwm, configurations, times.size());
+}
+
+void PCA9685::writeDutyRatios(int pwm, vector<float> const& ratios)
 {
     PWMConfiguration configurations[PWM_COUNT];
     for (size_t i = 0; i < ratios.size(); ++i) {
         auto& c{configurations[i]};
-        int32_t duty_cycle = round(ratios[i] * 4096);
-        if (duty_cycle <= 0) {
-            c.mode = PWM_MODE_OFF;
-        }
-        else if (duty_cycle >= 4096) {
-            c.mode = PWM_MODE_ON;
-        }
-        else {
-            c.mode = PWM_MODE_NORMAL;
-            c.on_edge = 0;
-            c.off_edge = duty_cycle - 1;
-        }
+        int32_t off_edge = round(ratios[i] * 4096) - 1;
+        c = PWMConfiguration::fromUnnormalizedOffEdge(off_edge);
     }
 
     writePWMConfigurations(pwm, configurations, ratios.size());

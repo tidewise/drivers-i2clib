@@ -2,6 +2,7 @@
 #define I2CLIB_PCA9685_HPP
 
 #include <i2clib/I2CBus.hpp>
+#include <i2clib/PCA9685PWMConfiguration.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -19,25 +20,7 @@ namespace i2clib {
      */
     class PCA9685 {
     public:
-        enum PWMMode {
-            PWM_MODE_OFF,
-            PWM_MODE_ON,
-            PWM_MODE_NORMAL
-        };
-
-        /** Configuration of a single PWM
-         *
-         * on_edge and off_edge are the timing (within a 4096-ticks cycle) of resp.
-         * the off->on transition and on->off transition.
-         *
-         * As such, they can't represent the "full ON" and "full OFF" state. The mode
-         * argument is meant for that.
-         */
-        struct PWMConfiguration {
-            PWMMode mode = PWM_MODE_OFF;
-            uint16_t on_edge = 0;
-            uint16_t off_edge = 0;
-        };
+        using PWMConfiguration = PCA9685PWMConfiguration;
 
     private:
         static constexpr uint8_t MODE1_ALLCALL_ENABLED = 1 << 0;
@@ -84,6 +67,7 @@ namespace i2clib {
         static constexpr int OSCILLATOR_PERIOD_NS = 40;
 
         static std::uint8_t periodToPrescale(std::uint32_t ns);
+        static std::uint32_t prescaleToPeriod(std::uint8_t ns);
 
         /** Create the driver and initialize the chip to defaults
          *
@@ -136,7 +120,13 @@ namespace i2clib {
         void writePWMConfigurations(int pwm, std::vector<PWMConfiguration> const& conf);
 
         /** Simplified interface to set the duty cycles in [0, 1] */
-        void writeDutyCycles(int pwm, std::vector<float> const& cycles);
+        void writeDutyTimes(int pwm, std::vector<uint32_t> const& periods);
+
+        /** Simplified interface to set the duty cycles in [0, 1] */
+        void writeDutyRatios(int pwm, std::vector<float> const& cycles);
+
+        /** Read the currently configured PWM period in nanoseconds */
+        uint32_t readPWMPeriod();
     };
 }
 

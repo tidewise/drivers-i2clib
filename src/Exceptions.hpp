@@ -7,6 +7,9 @@ namespace i2clib {
     struct IOError : public std::runtime_error {
         using std::runtime_error::runtime_error;
     };
+    struct ReadError : public IOError {
+        using IOError::IOError;
+    };
     struct WriteError : public IOError {
         using IOError::IOError;
     };

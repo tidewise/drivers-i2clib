@@ -1,6 +1,6 @@
 rock_library(i2clib
-    SOURCES I2CBus.cpp PCA9685.cpp
-    HEADERS I2CBus.hpp PCA9685.hpp
+    SOURCES I2CBus.cpp PCA9685.cpp PCA9685PWMConfiguration.cpp
+    HEADERS I2CBus.hpp PCA9685.hpp PCA9685PWMConfiguration.hpp
     DEPS_PKGCONFIG base-types
 )
 

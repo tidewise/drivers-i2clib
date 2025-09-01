@@ -28,6 +28,31 @@ namespace i2clib {
          */
         void setTimeout(base::Time const& timeout);
 
+        /** Perform a transaction with a write followed by a read
+         *
+         * \c data contains information for the write. The read information is
+         * returned.
+         */
+        template <int Size> std::array<uint8_t, Size> read(uint8_t address, uint8_t reg)
+        {
+            std::array<uint8_t, Size> read_bytes;
+            uint8_t reg_rw{reg};
+
+            read(address, &reg_rw, 1, read_bytes.data(), read_bytes.size());
+            return read_bytes;
+        }
+
+        /** Perform a transaction with a write followed by a read
+         *
+         * \c data contains information for the write. The read information is
+         * returned.
+         */
+        void read(uint8_t address,
+            uint8_t* write_bytes,
+            size_t write_size,
+            uint8_t* bytes,
+            size_t size);
+
         /** Write \c size bytes at the given address
          */
         void write(uint8_t address, uint8_t* bytes, size_t size);

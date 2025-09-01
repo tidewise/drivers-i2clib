@@ -21,6 +21,7 @@ void usage(string const& cmd, ostream& io)
        << "  sleep put the chip to sleep\n"
        << "  enable-external-clock use an external clock instead of the internal one\n"
        << "     The command stops PWM generation and put the chip to sleep\n"
+       << "  stop set all PWM outputs to zero\n"
        << "  wakeup wake the chip up after a sleep\n"
        << flush;
 }
@@ -57,6 +58,9 @@ int main(int argc, char** argv)
     i2clib::PCA9685 chip(bus, address);
     if (cmd == "sleep") {
         chip.writeSleepMode();
+    }
+    else if (cmd == "stop") {
+        chip.stop();
     }
     else if (cmd == "enable-external-clock") {
         chip.stop();

@@ -16,10 +16,12 @@ uint8_t PCA9685::periodToPrescale(uint32_t ns)
 {
     float denom = OSCILLATOR_PERIOD_NS * 4096;
     if (ns < 4 * denom) {
-        throw std::invalid_argument("PWM period too low (" + to_string(ns) + "ns)");
+        throw std::invalid_argument(
+            "PWM period too low (" + to_string(ns) + "ns, minimum is ~656us)");
     }
     else if (ns > 256 * denom) {
-        throw std::invalid_argument("PWM period too high (" + to_string(ns) + "ns)");
+        throw std::invalid_argument(
+            "PWM period too high (" + to_string(ns) + "ns, maximum is ~42ms)");
     }
 
     return std::round(ns / denom) - 1;

@@ -87,5 +87,10 @@ int main(int argc, char** argv)
         chip.writeNormalMode();
         chip.writeDutyCycles(pwm, {ratio});
     }
+    else {
+        cerr << "invalid command " << cmd << endl;
+        usage(argv[0], cerr);
+        return 1;
+    }
     return 0;
 }

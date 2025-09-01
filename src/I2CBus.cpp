@@ -55,7 +55,8 @@ void I2CBus::write(uint8_t address, uint8_t* registers, size_t size)
     query.nmsgs = 1;
     if (ioctl(m_fd, I2C_RDWR, &query) == -1) {
         ostringstream message;
-        message << "failed write to address " + to_string(address) << ":";
+        message << "failed write to address " + to_string(address) << ": ";
+        message << strerror(errno);
         for (size_t i = 0; i < size; ++i) {
             message << " " << hex << static_cast<int>(registers[i]);
         }

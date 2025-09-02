@@ -14,3 +14,8 @@ rock_executable(
     i2c_pca9685_ctl PCA9685Main.cpp
     DEPS i2clib
 )
+
+rock_executable(
+    i2c_bmp280_ctl BMP280Main.cpp
+    DEPS i2clib
+)

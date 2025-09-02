@@ -15,6 +15,11 @@ BMP280::BMP280(I2CBus& bus, std::uint8_t address)
     m_calibration = readCalibration();
 }
 
+uint8_t BMP280::readID()
+{
+    return m_i2c.read<1>(m_address, REGISTER_ID)[0];
+}
+
 void BMP280::writeMode(DeviceMode mode)
 {
     writeConfigurationRegisters(mode, m_conf);

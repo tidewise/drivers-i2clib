@@ -31,6 +31,7 @@ namespace i2clib {
         };
 
     private:
+        static constexpr std::uint8_t REGISTER_ID = 0xD0;
         static constexpr std::uint8_t REGISTER_STATUS = 0xF3;
         static constexpr std::uint8_t REGISTER_MEASUREMENT_CONTROL = 0xF4;
         static constexpr std::uint8_t REGISTER_CONFIG = 0xF5;
@@ -49,6 +50,12 @@ namespace i2clib {
 
     public:
         BMP280(I2CBus& bus, std::uint8_t address);
+
+        /** Read the device ID
+         *
+         * Mostly useful as a sanity check
+         */
+        uint8_t readID();
 
         /** Change the device mode */
         void writeMode(DeviceMode mode);

@@ -24,10 +24,19 @@ namespace i2clib {
         using Configuration = BMP280Configuration;
 
         struct Calibration {
-            std::array<double, 9> dig_P;
-            std::array<double, 3> dig_T;
+            uint16_t dig_P1 = 0;
+            int16_t dig_P2 = 0;
+            int16_t dig_P3 = 0;
+            int16_t dig_P4 = 0;
+            int16_t dig_P5 = 0;
+            int16_t dig_P6 = 0;
+            int16_t dig_P7 = 0;
+            int16_t dig_P8 = 0;
+            int16_t dig_P9 = 0;
 
-            Calibration();
+            uint16_t dig_T1 = 0;
+            int16_t dig_T2 = 0;
+            int16_t dig_T3 = 0;
         };
 
     private:

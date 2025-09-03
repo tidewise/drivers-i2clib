@@ -13,9 +13,9 @@ using namespace std;
 using namespace i2clib;
 using PWMConfiguration = PCA9685PWMConfiguration;
 
-uint8_t PCA9685::periodToPrescale(uint32_t ns)
+uint8_t PCA9685::periodToPrescale(uint32_t ns, float freq)
 {
-    float denom = OSCILLATOR_PERIOD_NS * 4096;
+    double denom = 1e9 / freq * 4096;
     if (ns < 4 * denom) {
         throw std::invalid_argument(
             "PWM period too low (" + to_string(ns) + "ns, minimum is ~656us)");
@@ -28,10 +28,10 @@ uint8_t PCA9685::periodToPrescale(uint32_t ns)
     return std::round(ns / denom) - 1;
 }
 
-uint32_t PCA9685::prescaleToPeriod(uint8_t prescale)
+uint32_t PCA9685::prescaleToPeriod(uint8_t prescale, float freq)
 {
-    float denom = OSCILLATOR_PERIOD_NS * 4096;
-    return (prescale + 1) * denom;
+    double denom = 1e9 / freq * 4096;
+    return std::round((prescale + 1) * denom);
 }
 
 PCA9685::PCA9685(I2CBus& i2c, uint8_t address)
@@ -81,12 +81,6 @@ void PCA9685::writeMode1()
 void PCA9685::writeMode2()
 {
     m_i2c.write(m_address, {REGISTER_MODE2, m_mode2});
-}
-
-void PCA9685::writeCycleDuration(uint32_t ns)
-{
-    uint8_t prescale = periodToPrescale(ns);
-    m_i2c.write(m_address, {REGISTER_PRESCALE, prescale});
 }
 
 void PCA9685::pwmConfigurationToRegisters(uint8_t* registers,
@@ -142,15 +136,21 @@ void PCA9685::writePWMConfigurations(int pwm,
     return writePWMConfigurations(pwm, configurations.data(), configurations.size());
 }
 
-uint32_t PCA9685::readPWMPeriod() {
-    uint8_t prescale = m_i2c.read<1>(m_address, REGISTER_PRESCALE).at(0);
-    return prescaleToPeriod(prescale);
+void PCA9685::writePrescale(uint8_t prescale)
+{
+    m_i2c.write(m_address, {REGISTER_PRESCALE, prescale});
 }
 
-void PCA9685::writeDutyTimes(int pwm, vector<uint32_t> const& times)
+uint32_t PCA9685::readPWMPeriod(float freq)
+{
+    uint8_t prescale = m_i2c.read<1>(m_address, REGISTER_PRESCALE).at(0);
+    return prescaleToPeriod(prescale, freq);
+}
+
+void PCA9685::writeDutyTimes(int pwm, vector<uint32_t> const& times, float freq)
 {
     // Get the duration of a single PWM step (one of 4096)
-    uint32_t quanta = readPWMPeriod() / 4096;
+    uint32_t quanta = readPWMPeriod(freq) / 4096.0;
 
     PWMConfiguration configurations[PWM_COUNT];
     for (size_t i = 0; i < times.size(); ++i) {

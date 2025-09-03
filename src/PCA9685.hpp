@@ -64,10 +64,12 @@ namespace i2clib {
             size_t size);
 
     public:
-        static constexpr int OSCILLATOR_PERIOD_NS = 40;
+        static constexpr float INTERNAL_OSCILLATOR_FREQUENCY = 25e6;
 
-        static std::uint8_t periodToPrescale(std::uint32_t ns);
-        static std::uint32_t prescaleToPeriod(std::uint8_t ns);
+        static std::uint8_t periodToPrescale(std::uint32_t ns,
+            float freq = INTERNAL_OSCILLATOR_FREQUENCY);
+        static std::uint32_t prescaleToPeriod(std::uint8_t ns,
+            float freq = INTERNAL_OSCILLATOR_FREQUENCY);
 
         /** Create the driver and initialize the chip to defaults
          *
@@ -106,8 +108,12 @@ namespace i2clib {
          */
         void writeNormalMode();
 
-        /** Change the PWM cycle */
-        void writeCycleDuration(uint32_t ns);
+        /** Change the PWM cycle by writing the prescale parameter
+         *
+         * See periodToPrescale and prescaleToPeriod for conversion between the
+         * PWM cycle period and the prescale parameter
+         */
+        void writePrescale(uint8_t prescale);
 
         /** Write the configuration of a single PWM
          *
@@ -120,13 +126,15 @@ namespace i2clib {
         void writePWMConfigurations(int pwm, std::vector<PWMConfiguration> const& conf);
 
         /** Simplified interface to set the duty cycles in [0, 1] */
-        void writeDutyTimes(int pwm, std::vector<uint32_t> const& periods);
+        void writeDutyTimes(int pwm,
+            std::vector<uint32_t> const& periods,
+            float freq = INTERNAL_OSCILLATOR_FREQUENCY);
 
         /** Simplified interface to set the duty cycles in [0, 1] */
         void writeDutyRatios(int pwm, std::vector<float> const& cycles);
 
         /** Read the currently configured PWM period in nanoseconds */
-        uint32_t readPWMPeriod();
+        uint32_t readPWMPeriod(float freq = INTERNAL_OSCILLATOR_FREQUENCY);
     };
 }
 

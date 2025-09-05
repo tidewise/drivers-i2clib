@@ -91,10 +91,6 @@ namespace i2clib {
          */
         PCA9685(I2CBus& i2c_bus, uint8_t address);
 
-        /** Destroy the driver, stopping PWMs and putting the chip to sleep
-         */
-        ~PCA9685();
-
         /** Stop all PWMs (i.e. make them be all off) */
         void stop();
 

@@ -33,10 +33,6 @@ PCA9685::PCA9685(I2CBus& i2c, uint8_t address)
 {
 }
 
-PCA9685::~PCA9685()
-{
-}
-
 void PCA9685::writeSleepMode()
 {
     m_mode1 |= MODE1_SLEEP;

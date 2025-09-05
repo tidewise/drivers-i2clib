@@ -15,8 +15,12 @@ namespace i2clib {
      * on the auto-increment function to be enabled, and does not implement the restart
      * function (i.e. one has to stop all PWMs before stopping the chip)
      *
-     * The constructor will stop all PWMs, put the chip in sleep mode and set the
-     * chip configuration to the manufacturer's default plus the auto-increment enabled.
+     * The prescale parameter allows to change the duration of the PWM cycle -
+     * it is global, that is common to all PWM outputs. See \c writePrescale for
+     * a complete discussion.
+     *
+     * We recomment calling \c stop before \c writeSleep. Some devices are known to
+     * misbehave if the PWM is non-zero when the PWM generators are active.
      */
     class PCA9685 {
     public:
@@ -66,8 +70,21 @@ namespace i2clib {
     public:
         static constexpr float INTERNAL_OSCILLATOR_FREQUENCY = 25e6;
 
+        /** Compute the PWM period from the chip's prescale parameter
+         *
+         * See \c writePrescale's documentation for a discussion on the prescale
+         * parameter
+         *
+         * @see writePrescale
+         */
         static std::uint8_t periodToPrescale(std::uint32_t ns,
             float freq = INTERNAL_OSCILLATOR_FREQUENCY);
+
+        /** Compute the chip's prescale parameter that is closest to the given
+         * PWM period
+         *
+         * @see writePrescale
+         */
         static std::uint32_t prescaleToPeriod(std::uint8_t ns,
             float freq = INTERNAL_OSCILLATOR_FREQUENCY);
 
@@ -108,20 +125,32 @@ namespace i2clib {
          */
         void writeNormalMode();
 
-        /** Change the PWM cycle by writing the prescale parameter
+        /** Change the duration of the PWM cycle by writing the prescale parameter
          *
-         * See periodToPrescale and prescaleToPeriod for conversion between the
-         * PWM cycle period and the prescale parameter
+         * The chip needs to be in sleep mode to change this
+         *
+         * Internally, the chip allows for the selection of a PWM period based
+         * on a 'prescale' parameter that can be set from 3 to 255. The
+         * available periods depend on the oscillator frequency (25MHz by
+         * default, can be different if an external oscillator is selected). The
+         * chip's datasheet explains how to compute those.
+         *
+         * \c prescaleToPeriod finds the prescale parameter that is closest to a
+         * desired period (given the oscillator frequency). Note that this might
+         * not be the prescale parameter you want. Depending on the devices you
+         * are controlling with the PWM, you might need a period of "at least"
+         * some duration. The i2c_pca9685_ctl tool has `period-to-prescale` and
+         * `prescale-to-period` to help you play with the values and select the
+         * one that is appropriate.
          */
         void writePrescale(uint8_t prescale);
 
-        /** Write the configuration of a single PWM
+        /** Write the configuration of a contiguous set of PWMs
          *
-         * @param mode since on_edge and off_edge are transition times, these values
-         *   cannot represent the two extreme "ON" and "OFF" states. `mode` represents
-         *   them
-         * @param on_edge transition "time" (between 0 and 4095) between off and on
-         * @param off_edge transition "time" (between 0 and 4095) between on and off
+         * It configures the PWMs from `pwm` to `pwm + conf.size() - 1`
+         *
+         * @param pwm the start PWM (0-based)
+         * @param conf the PWM configurations
          */
         void writePWMConfigurations(int pwm, std::vector<PWMConfiguration> const& conf);
 

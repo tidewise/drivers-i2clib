@@ -106,8 +106,14 @@ BMP280Measurement BMP280::read()
     return result;
 }
 
-// Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123”
-// equals 51.23 DegC. t_fine carries fine temperature as global value
+/** Conversion from raw ADC values to temperature using the device's calibration
+ *
+ * Copied from the Bosch datasheet
+ *
+ * Note that the int32_t value returned by the function is a scaled-up value for
+ * the temperature, meant to be passed as "t_fine" to bmp280_compensate_P_int32
+ * (also from Bosch datasheet)
+ */
 static pair<Temperature, int32_t> bmp280_compensate_T_int32(int32_t adc_T,
     BMP280::Calibration const& c)
 {
@@ -124,8 +130,13 @@ static pair<Temperature, int32_t> bmp280_compensate_T_int32(int32_t adc_T,
     return make_pair(t, t_fine);
 }
 
-// Returns pressure in Pa as unsigned 32 bit integer. Output value of “96386” equals
-// 96386 Pa = 963.86 hPa
+/** Conversion from raw ADC values and temperature estimate to pressure using the device's
+ * calibration
+ *
+ * Copied from the Bosch datasheet
+ *
+ * @param t_fine representation of the temperature returned by bmp280_compensate_T_int32
+ */
 static Pressure bmp280_compensate_P_int32(int32_t adc_P,
     int32_t t_fine,
     BMP280::Calibration const& c)

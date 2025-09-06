@@ -147,10 +147,10 @@ uint32_t PCA9685::readPWMPeriod(float freq)
     return prescaleToPeriod(prescale, freq);
 }
 
-void PCA9685::writeDutyTimes(int pwm, vector<uint32_t> const& times, float freq)
+void PCA9685::writeDutyTimes(int pwm, vector<uint32_t> const& times, uint32_t period)
 {
     // Get the duration of a single PWM step (one of 4096)
-    uint32_t quanta = readPWMPeriod(freq) / 4096.0;
+    uint32_t quanta = period / 4096.0;
 
     PWMConfiguration configurations[PWM_COUNT];
     for (size_t i = 0; i < times.size(); ++i) {

@@ -136,14 +136,15 @@ int main(int argc, char** argv)
     else if (cmd == "set-duty-us") {
         auto cmdArgs = validateCmdArgc(argc, argv, 2, 3);
         auto pwm = stoi(cmdArgs[0]);
-        uint32_t period = stoi(cmdArgs[1]);
+        uint32_t duty_duration_us = stoi(cmdArgs[1]);
         float freq = PCA9685::INTERNAL_OSCILLATOR_FREQUENCY;
         if (cmdArgs.size() == 3) {
             freq = stof(cmdArgs[2]);
         }
+        uint32_t period = chip.readPWMPeriod(freq);
 
         chip.writeNormalMode();
-        chip.writeDutyTimes(pwm, {period * 1000}, freq);
+        chip.writeDutyTimes(pwm, {duty_duration_us * 1000}, period);
     }
     else if (cmd == "set-duty-ratio") {
         auto cmdArgs = validateCmdArgc(argc, argv, 2);

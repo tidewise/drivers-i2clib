@@ -154,10 +154,16 @@ namespace i2clib {
          */
         void writePWMConfigurations(int pwm, std::vector<PWMConfiguration> const& conf);
 
-        /** Simplified interface to set the duty cycles in [0, 1] */
+        /** Simplified interface to set the duty cycles in nanoseconds
+         *
+         * @param durations the duty durations in nanoseconds
+         * @param period the chip's known PWM period. Use \c readPeriod to
+         *   read it from the chip configuration, or if you are explicitly
+         *   setting the prescale parameter, use \c prescaleToPeriod
+         */
         void writeDutyTimes(int pwm,
-            std::vector<uint32_t> const& periods,
-            float freq = INTERNAL_OSCILLATOR_FREQUENCY);
+            std::vector<uint32_t> const& durations,
+            uint32_t period);
 
         /** Simplified interface to set the duty cycles in [0, 1] */
         void writeDutyRatios(int pwm, std::vector<float> const& cycles);

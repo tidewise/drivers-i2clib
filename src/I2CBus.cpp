@@ -42,6 +42,34 @@ void I2CBus::setTimeout(base::Time const& timeout)
     }
 }
 
+void I2CBus::read(uint8_t address,
+    uint8_t* write_bytes,
+    size_t write_size,
+    uint8_t* bytes,
+    size_t size)
+{
+    i2c_msg messages[2];
+    messages[0].flags = 0;
+    messages[0].addr = address;
+    messages[0].len = write_size;
+    messages[0].buf = write_bytes;
+    messages[1].flags = I2C_M_RD;
+    messages[1].addr = address;
+    messages[1].len = size;
+    messages[1].buf = bytes;
+
+    i2c_rdwr_ioctl_data query;
+    query.msgs = messages;
+    query.nmsgs = 2;
+
+    if (ioctl(m_fd, I2C_RDWR, &query) == -1) {
+        ostringstream message;
+        message << "failed read to address " + to_string(address) << ": ";
+        message << strerror(errno);
+        throw ReadError(message.str());
+    }
+}
+
 void I2CBus::write(uint8_t address, uint8_t* registers, size_t size)
 {
     i2c_msg config_msg;
@@ -57,9 +85,6 @@ void I2CBus::write(uint8_t address, uint8_t* registers, size_t size)
         ostringstream message;
         message << "failed write to address " + to_string(address) << ": ";
         message << strerror(errno);
-        for (size_t i = 0; i < size; ++i) {
-            message << " " << hex << static_cast<int>(registers[i]);
-        }
         throw WriteError(message.str());
     }
 }

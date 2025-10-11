@@ -16,6 +16,8 @@ void usage(string const& cmd, ostream& io)
        << "  check: read and verify the chip ID\n"
        << "  normal: start periodic measurements\n"
        << "  sleep: stop measurements\n"
+       << "  raw: display raw data\n"
+       << "  read: display compensated data\n"
        << flush;
 }
 

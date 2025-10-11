@@ -54,11 +54,17 @@ namespace i2clib {
         Configuration m_conf;
         Calibration m_calibration;
 
-        Calibration readCalibration();
         void writeConfigurationRegisters(DeviceMode mode, Configuration const& conf);
 
     public:
         BMP280(I2CBus& bus, std::uint8_t address);
+
+        /** Read the calibration data
+         *
+         * This is public for debugging purposes. The driver reads calibration data
+         * automatically on construction
+         */
+        Calibration readCalibration();
 
         /** Read the device ID
          *

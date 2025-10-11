@@ -16,6 +16,7 @@ void usage(string const& cmd, ostream& io)
        << "  check: read and verify the chip ID\n"
        << "  normal: start periodic measurements\n"
        << "  sleep: stop measurements\n"
+       << "  calibration: display calibration data\n"
        << "  raw: display raw data\n"
        << "  read: display compensated data\n"
        << flush;
@@ -68,6 +69,22 @@ int main(int argc, char** argv) {
     }
     else if (cmd == "defaults") {
         chip.sleepAndWriteConfiguration(BMP280Configuration());
+    }
+    else if (cmd == "calibration") {
+        auto calibration = chip.readCalibration();
+        std::cout
+            << "T1: " << calibration.dig_T1 << "\n"
+            << "T2: " << calibration.dig_T2 << "\n"
+            << "T3: " << calibration.dig_T3 << "\n"
+            << "P1: " << calibration.dig_P1 << "\n"
+            << "P2: " << calibration.dig_P2 << "\n"
+            << "P3: " << calibration.dig_P3 << "\n"
+            << "P4: " << calibration.dig_P4 << "\n"
+            << "P5: " << calibration.dig_P5 << "\n"
+            << "P6: " << calibration.dig_P6 << "\n"
+            << "P7: " << calibration.dig_P7 << "\n"
+            << "P8: " << calibration.dig_P8 << "\n"
+            << "P9: " << calibration.dig_P9 << "\n";
     }
     else if (cmd == "raw") {
         auto meas = chip.readRaw();

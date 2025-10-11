@@ -90,6 +90,30 @@ namespace i2clib {
 
         /** Read data and calculate the actual measurements */
         BMP280Measurement read();
+
+        /** Conversion from raw ADC values to temperature using the device's calibration
+         *
+         * Copied from the Bosch datasheet
+         *
+         * Note that the int32_t value returned by the function is a scaled-up value for
+         * the temperature, meant to be passed as "t_fine" to bmp280_compensate_P_int32
+         * (also from Bosch datasheet)
+         */
+        static std::pair<base::Temperature, std::int32_t> compensate_T_int32(
+            int32_t adc_T,
+            BMP280::Calibration const& c);
+
+        /** Conversion from raw ADC values and temperature estimate to pressure using the
+         * device's calibration
+         *
+         * Copied from the Bosch datasheet
+         *
+         * @param t_fine representation of the temperature returned by
+         *   bmp280_compensate_T_int32
+         */
+        static base::Pressure compensate_P_int32(int32_t adc_P,
+            std::int32_t t_fine,
+            BMP280::Calibration const& c);
     };
 }
 

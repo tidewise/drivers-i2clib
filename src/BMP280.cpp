@@ -50,12 +50,12 @@ BMP280::RawMeasurements BMP280::readRaw()
     return raw;
 }
 
-uint16_t lsb_msb_to_uint16_t(uint8_t lsb, uint8_t msb)
+static uint16_t lsb_msb_to_uint16_t(uint8_t lsb, uint8_t msb)
 {
     return lsb | static_cast<uint16_t>(msb) << 8;
 }
 
-uint16_t lsb_msb_to_int16_t(uint8_t lsb, uint8_t msb)
+static int16_t lsb_msb_to_int16_t(uint8_t lsb, uint8_t msb)
 {
     uint16_t u = lsb_msb_to_uint16_t(lsb, msb);
     return reinterpret_cast<int16_t&>(u);

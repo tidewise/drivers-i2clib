@@ -44,9 +44,10 @@ BMP280::RawMeasurements BMP280::readRaw()
 {
     RawMeasurements raw;
     auto bytes = m_i2c.read<6>(m_address, REGISTER_PRESSURE_START);
-    raw.pressure = (static_cast<uint16_t>(bytes[0]) << 12) | (bytes[1] << 4) | bytes[2];
-    raw.temperature =
-        (static_cast<uint16_t>(bytes[3]) << 12) | (bytes[4] << 4) | bytes[5];
+    uint32_t p = (static_cast<uint32_t>(bytes[0]) << 16) | (static_cast<uint32_t>(bytes[1]) << 8) | bytes[2];
+    raw.pressure = p >> 4;
+    uint32_t t = (static_cast<uint32_t>(bytes[3]) << 16) | (static_cast<uint32_t>(bytes[4]) << 8) | bytes[5];
+    raw.temperature = t >> 4;
     return raw;
 }
 

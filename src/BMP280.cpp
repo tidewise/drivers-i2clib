@@ -44,18 +44,19 @@ BMP280::RawMeasurements BMP280::readRaw()
 {
     RawMeasurements raw;
     auto bytes = m_i2c.read<6>(m_address, REGISTER_PRESSURE_START);
-    raw.pressure = (static_cast<uint16_t>(bytes[0]) << 12) | (bytes[1] << 4) | bytes[2];
-    raw.temperature =
-        (static_cast<uint16_t>(bytes[3]) << 12) | (bytes[4] << 4) | bytes[5];
+    uint32_t p = (static_cast<uint32_t>(bytes[0]) << 16) | (static_cast<uint32_t>(bytes[1]) << 8) | bytes[2];
+    raw.pressure = p >> 4;
+    uint32_t t = (static_cast<uint32_t>(bytes[3]) << 16) | (static_cast<uint32_t>(bytes[4]) << 8) | bytes[5];
+    raw.temperature = t >> 4;
     return raw;
 }
 
-uint16_t lsb_msb_to_uint16_t(uint8_t lsb, uint8_t msb)
+static uint16_t lsb_msb_to_uint16_t(uint8_t lsb, uint8_t msb)
 {
     return lsb | static_cast<uint16_t>(msb) << 8;
 }
 
-uint16_t lsb_msb_to_int16_t(uint8_t lsb, uint8_t msb)
+static int16_t lsb_msb_to_int16_t(uint8_t lsb, uint8_t msb)
 {
     uint16_t u = lsb_msb_to_uint16_t(lsb, msb);
     return reinterpret_cast<int16_t&>(u);
@@ -83,12 +84,6 @@ BMP280::Calibration BMP280::readCalibration()
     return c;
 }
 
-static pair<Temperature, int32_t> bmp280_compensate_T_int32(int32_t adc_T,
-    BMP280::Calibration const& c);
-static Pressure bmp280_compensate_P_int32(int32_t adc_P,
-    int32_t t_fine,
-    BMP280::Calibration const& c);
-
 BMP280Measurement BMP280::read()
 {
     BMP280Measurement result;
@@ -99,10 +94,10 @@ BMP280Measurement BMP280::read()
         return result;
     }
 
-    auto compensated_T = bmp280_compensate_T_int32(raw.temperature, m_calibration);
+    auto compensated_T = compensate_T_int32(raw.temperature, m_calibration);
     result.temperature = compensated_T.first;
     result.pressure =
-        bmp280_compensate_P_int32(raw.pressure, compensated_T.second, m_calibration);
+        compensate_P_int32(raw.pressure, compensated_T.second, m_calibration);
     return result;
 }
 
@@ -114,7 +109,7 @@ BMP280Measurement BMP280::read()
  * the temperature, meant to be passed as "t_fine" to bmp280_compensate_P_int32
  * (also from Bosch datasheet)
  */
-static pair<Temperature, int32_t> bmp280_compensate_T_int32(int32_t adc_T,
+pair<Temperature, int32_t> BMP280::compensate_T_int32(int32_t adc_T,
     BMP280::Calibration const& c)
 {
     int32_t var1 =
@@ -137,7 +132,7 @@ static pair<Temperature, int32_t> bmp280_compensate_T_int32(int32_t adc_T,
  *
  * @param t_fine representation of the temperature returned by bmp280_compensate_T_int32
  */
-static Pressure bmp280_compensate_P_int32(int32_t adc_P,
+Pressure BMP280::compensate_P_int32(int32_t adc_P,
     int32_t t_fine,
     BMP280::Calibration const& c)
 {

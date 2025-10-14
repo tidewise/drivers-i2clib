@@ -2,6 +2,7 @@
 #include <i2clib/MS5837.hpp>
 #include <stdexcept>
 #include <thread>
+#include <iostream>
 
 using namespace i2clib;
 using namespace std;
@@ -64,7 +65,11 @@ MS5837::PROM MS5837::readPROM()
 
     uint8_t crc = crc4(result.C);
     if (crc != result.C[0] >> 24) {
-        throw runtime_error("invalid CRC in calibration data");
+        cerr << "Read PROM data\n";
+        for (int i = 0; i < CMD_PROM_READ_COUNT; ++i) {
+            cerr << hex << result.C[i] << "\n";
+        }
+        throw runtime_error("Invalid CRC in calibration data");
     }
 
     return result;

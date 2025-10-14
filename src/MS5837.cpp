@@ -12,6 +12,7 @@ MS5837::MS5837(Models model, I2CBus& bus, uint8_t address)
     , m_bus(bus)
     , m_address(address)
 {
+    m_prom = readPROM();
 }
 
 void MS5837::reset()

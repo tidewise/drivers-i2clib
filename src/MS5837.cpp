@@ -1,8 +1,8 @@
 #include <chrono>
 #include <i2clib/MS5837.hpp>
+#include <iostream>
 #include <stdexcept>
 #include <thread>
-#include <iostream>
 
 using namespace i2clib;
 using namespace std;
@@ -60,16 +60,18 @@ MS5837::PROM MS5837::readPROM()
     PROM result;
     for (int i = 0; i < CMD_PROM_READ_COUNT; ++i) {
         auto data = m_bus.read<2>(m_address, CMD_PROM_READ_BASE + i * 2);
-        result.C[i] = static_cast<uint16_t>(data[0]) << 16 | data[1];
+        result.C[i] = static_cast<uint16_t>(data[0]) << 8 | data[1];
     }
 
     uint8_t crc = crc4(result.C);
-    if (crc != result.C[0] >> 24) {
+    uint8_t actual_crc = (result.C[0] >> 12);
+    if (crc != actual_crc) {
         cerr << "Read PROM data\n";
         for (int i = 0; i < CMD_PROM_READ_COUNT; ++i) {
             cerr << hex << result.C[i] << "\n";
         }
-        throw runtime_error("Invalid CRC in calibration data");
+        throw runtime_error("Invalid CRC in calibration data, expected: " +
+                            to_string(crc) + ", actual: " + to_string(actual_crc));
     }
 
     return result;
